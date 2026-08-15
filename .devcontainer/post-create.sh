@@ -13,6 +13,8 @@ if [ ! -f .flyte/config.yaml ]; then
         --project flytesnacks \
         --domain development \
         --builder local \
+        --registry localhost:30000 \
+        --force \
         --insecure
 else
     echo "    .flyte/config.yaml already exists, skipping"
