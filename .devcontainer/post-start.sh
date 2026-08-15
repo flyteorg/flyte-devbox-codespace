@@ -9,6 +9,14 @@ devbox_up() {
     curl -s -o /dev/null --max-time 2 "$FLYTE_URL"
 }
 
+# Port visibility can't be set declaratively in devcontainer.json, so make the
+# Flyte port public via the gh CLI when running inside a codespace.
+if [ -n "${CODESPACE_NAME:-}" ] && command -v gh >/dev/null 2>&1; then
+    echo "==> Making port 30080 public"
+    gh codespace ports visibility 30080:public -c "$CODESPACE_NAME" \
+        || echo "    (could not set port visibility automatically — set it in the PORTS tab)"
+fi
+
 if devbox_up; then
     echo "==> Flyte devbox is already running at $FLYTE_URL"
     exit 0

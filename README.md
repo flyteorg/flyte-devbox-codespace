@@ -8,8 +8,9 @@ get a feel for the platform in a few minutes.
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/flyteorg/flyte-devbox-codespace?quickstart=1)
 
-> **Machine type:** pick the **4-core** machine when creating the codespace.
-> The devbox runs a Kubernetes cluster in Docker and needs the headroom.
+> **Machine type:** the **4-core** machine is recommended — the devbox runs a
+> Kubernetes cluster in Docker and appreciates the headroom — but the **2-core**
+> machine works too since the examples request only fractional CPUs.
 
 ## What happens on startup
 
@@ -18,7 +19,11 @@ get a feel for the platform in a few minutes.
 2. `flyte start devbox` boots the local cluster. The first boot pulls container
    images and takes a few minutes — watch progress in the
    "Running postStartCommand" terminal.
-3. Port **30080** (the Flyte UI and API) is forwarded automatically.
+3. Port **30080** (the Flyte UI and API) is forwarded automatically over
+   plain HTTP and switched to **public** visibility so the UI link just works.
+   If the automatic switch fails (it needs the `codespace` scope on your
+   GitHub token), right-click the port in the **PORTS** tab and set
+   **Port Visibility → Public**.
 
 ## Run your first workflow
 
@@ -34,8 +39,8 @@ run's task graph, inputs/outputs, and logs.
 
 ## Examples
 
-All examples request tiny amounts of CPU (`250m`–`500m`) so they fit
-comfortably on the 4-core codespace:
+All examples request tiny amounts of CPU (`250m`–`500m`) so they fit even on
+the smallest 2-core codespace:
 
 | Example | What it shows |
 |---|---|
