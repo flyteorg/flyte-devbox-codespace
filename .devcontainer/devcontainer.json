@@ -1,0 +1,42 @@
+{
+  "name": "Flyte Devbox",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12-bookworm",
+
+  // The devbox runs a local Kubernetes cluster inside Docker, so we need
+  // docker-in-docker plus kubectl for poking at the cluster.
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "helm": "none",
+      "minikube": "none"
+    }
+  },
+
+  // The devbox needs a reasonably beefy machine: pick the 4-core Codespaces
+  // machine type (4 CPUs / 16 GB RAM) as the minimum.
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "16gb",
+    "storage": "32gb"
+  },
+
+  // The Flyte devbox serves both the UI and the API on port 30080.
+  "forwardPorts": [30080],
+  "portsAttributes": {
+    "30080": {
+      "label": "Flyte UI / API",
+      "onAutoForward": "notify"
+    }
+  },
+
+  // post-create: install the flyte SDK and generate .flyte/config.yaml
+  // post-start: start (or resume) the devbox cluster — runs on every boot
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "bash .devcontainer/post-start.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    }
+  }
+}
