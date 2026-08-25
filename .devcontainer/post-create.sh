@@ -1,16 +1,11 @@
-#!/usr/bin/env bash
-# Runs once when the codespace is created: install the Flyte SDK and point it
-# at the local devbox cluster.
-set -euo pipefail
+#!/bin/bash
+set -e
 
-echo "==> Installing the flyte SDK"
-pip install --upgrade flyte
+# kubectl and the Flyte SDK are pre-installed in the devcontainer image
+# (.devcontainer/Dockerfile), so the only remaining setup here is generating
+# .flyte/config.yaml for the workspace.
 
-echo "==> Writing Flyte config pointing at the devbox (localhost:30080)"
-if [ ! -f .flyte/config.yaml ]; then
-    flyte create config --devbox --force
-else
-    echo "    .flyte/config.yaml already exists, skipping"
-fi
-
-echo "==> Done. The devbox cluster itself is started by post-start.sh."
+mkdir -p .flyte
+touch .flyte/config.yaml
+echo "Generating .flyte/config.yaml"
+flyte create config --endpoint localhost:30080 --insecure --overwrite

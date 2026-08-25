@@ -14,11 +14,14 @@ get a feel for the platform in a few minutes.
 
 ## What happens on startup
 
-1. The devcontainer installs the `flyte` SDK and writes `.flyte/config.yaml`
+1. The devcontainer image has kubectl and the `flyte` SDK pre-installed
+   (`.devcontainer/Dockerfile`); startup only writes `.flyte/config.yaml`
    pointing at the devbox (`localhost:30080`, local image builder).
-2. `flyte start devbox` boots the local cluster. The first boot pulls container
-   images and takes a few minutes — watch progress in the
-   "Running postStartCommand" terminal.
+2. `flyte start devbox` boots the local cluster. The first boot pulls the
+   devbox container image and takes a few minutes — watch progress in the
+   "Running postStartCommand" terminal. The image is pinned by digest, so
+   restarts reuse the cached copy instead of silently re-downloading it when
+   upstream moves the floating `:latest` tag.
 3. Port **30080** (the Flyte UI and API) is forwarded automatically over
    plain HTTP and switched to **public** visibility so the UI link just works.
    If the automatic switch fails (it needs the `codespace` scope on your
@@ -65,6 +68,16 @@ flyte start devbox             # bring it back
 flyte delete devbox --volume   # remove it entirely, including data
 kubectl get pods -A            # peek under the hood
 ```
+
+## Updating baked-in dependencies
+
+- **Flyte SDK** — bump the `flyte==<version>` pin in `.devcontainer/Dockerfile`.
+- **Devbox cluster image** — fetch the current `:latest` digest and update
+  `FLYTE_DEVBOX_IMAGE` in `.devcontainer/post-start.sh`:
+
+  ```bash
+  docker buildx imagetools inspect cr.flyte.org/flyteorg/flyte-devbox:latest
+  ```
 
 ## Next steps
 
