@@ -13,11 +13,11 @@
   },
 
   // Minimum machine spec: the devbox runs fine on the 2-core Codespaces
-  // machine (2 CPUs / 8 GB RAM), though 4-core is recommended for snappier
+  // machine (4 CPUs / 16 GB RAM), though 4-core is recommended for snappier
   // workflow runs.
   "hostRequirements": {
-    "cpus": 2,
-    "memory": "8gb",
+    "cpus": 4,
+    "memory": "16gb",
     "storage": "32gb"
   },
 
