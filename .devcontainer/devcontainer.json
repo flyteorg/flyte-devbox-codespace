@@ -26,7 +26,6 @@
   "portsAttributes": {
     "30080": {
       "label": "Flyte UI / API",
-      "onAutoForward": "openBrowser",
       "protocol": "http"
     }
   },
