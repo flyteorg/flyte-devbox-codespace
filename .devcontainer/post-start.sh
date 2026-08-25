@@ -1,22 +1,42 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+# Runs on every codespace start: bring up the Flyte devbox cluster if it isn't
+# already running. Safe to re-run.
+set -euo pipefail
 
-# The devbox image is pinned by digest. The upstream tag `:latest` moves
-# frequently, and `docker pull` with a floating tag silently re-downloads
-# layers whenever it moves, slowing down codespace restarts. A pinned digest
-# makes the pull a no-op when the image is already in the local Docker store.
-#
-# To pick up a newer devbox release, fetch the current `:latest` digest with:
-#   docker buildx imagetools inspect cr.flyte.org/flyteorg/flyte-devbox:latest
-# and update the digest below.
-FLYTE_DEVBOX_IMAGE="cr.flyte.org/flyteorg/flyte-devbox@sha256:c119ad4d62831e96c530002620efbee3a350bc8613f03c06b336faf3d01c8f3b"
+FLYTE_URL="http://localhost:30080"
 
-# Start Flyte devbox if it is not already running (paused clusters are resumed
-# by `flyte start devbox`, so only skip when the container is actively running).
-if ! docker ps --filter "name=^flyte-devbox$" --filter "status=running" --format '{{.Names}}' | grep -q "flyte-devbox"; then
-    echo "Starting Flyte devbox cluster..."
-    echo "Note: First launch pulls container images and may take a few minutes."
-    flyte start devbox --image "$FLYTE_DEVBOX_IMAGE"
-else
-    echo "Flyte devbox cluster is already running."
+devbox_up() {
+    curl -s -o /dev/null --max-time 2 "$FLYTE_URL"
+}
+
+# Port visibility can't be set declaratively in devcontainer.json, so make the
+# Flyte port public via the gh CLI when running inside a codespace.
+if [ -n "${CODESPACE_NAME:-}" ] && command -v gh >/dev/null 2>&1; then
+    echo "==> Making port 30080 public"
+    gh codespace ports visibility 30080:public -c "$CODESPACE_NAME" \
+        || echo "    (could not set port visibility automatically — set it in the PORTS tab)"
 fi
+
+if devbox_up; then
+    echo "==> Flyte devbox is already running at $FLYTE_URL"
+    exit 0
+fi
+
+echo "==> Starting the Flyte devbox (first boot pulls images — this can take a few minutes)"
+flyte start devbox
+
+echo "==> Waiting for the devbox to become reachable at $FLYTE_URL"
+for _ in $(seq 1 120); do
+    if devbox_up; then
+        echo ""
+        echo "==> Flyte devbox is up! 🚀"
+        echo "    UI:  open the forwarded port 30080 (PORTS tab in VS Code)"
+        echo "    Try: flyte run examples/hello.py main"
+        exit 0
+    fi
+    sleep 5
+done
+
+echo "==> Timed out waiting for the devbox. Check status with:" >&2
+echo "    docker ps && kubectl get pods -A" >&2
+exit 1
